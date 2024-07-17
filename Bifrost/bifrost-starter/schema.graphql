@@ -64,6 +64,7 @@ type Redeemed @entity {
   """
   date: Date!
   who: Account!
+  token_id: String!
   vtoken_amount: BigInt!
   token_amount: BigInt!
 }
@@ -85,5 +86,42 @@ type RedeemAccount @entity {
   The most recent block on which we see a transfer involving this account
   """
   lastRedeemBlock: Int
-  Redeems: [Redeemed] @derivedFrom(field: "who") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+}
+
+type Minted @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The block height of the transfer
+  """
+  blockNumber: Int!
+  """
+  The date of the transfer
+  """
+  date: Date!
+  who: Account!
+  token_id: String!
+  vtoken_amount: BigInt!
+  token_amount: BigInt!
+}
+
+type MintAccount @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The public key of this account (same across all Polkadot parachains)
+  """
+  publicKey: String!
+  """
+  The first block on which we see a transfer involving this account
+  """
+  firstMintBlock: Int
+  """
+  The most recent block on which we see a transfer involving this account
+  """
+  lastMintBlock: Int
 }

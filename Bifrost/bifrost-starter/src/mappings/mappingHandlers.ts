@@ -3,7 +3,7 @@ import {
   SubstrateEvent,
   SubstrateBlock,
 } from "@subql/types";
-import { Account, Transfer, RedeemAccount, Redeemed } from "../types";
+import { Account, Transfer, RedeemAccount, Redeemed, Minted, MintAccount } from "../types";
 import { Balance } from "@polkadot/types/interfaces";
 import { decodeAddress } from "@polkadot/util-crypto";
 
@@ -90,6 +90,7 @@ export async function handleRedeemEvent(event: SubstrateEvent): Promise<void> {
     blockNumber,
     date: event.block.timestamp,
     whoId: who.id,
+    token_id: token_id.toString(),
     vtoken_amount: (vtoken_amount as Balance).toBigInt(),
     token_amount: (token_amount as Balance).toBigInt(),
   });
@@ -110,6 +111,56 @@ async function checkAndGetRedeemAccount(
       id: id,
       publicKey: decodeAddress(id).toString(),
       firstRedeemBlock: blockNumber,
+    });
+  }
+  return account;
+}
+
+export async function handleMintEvent(event: SubstrateEvent): Promise<void> {
+  logger.info(
+    `New transfer event found at block ${event.block.block.header.number.toString()}`,
+  );
+
+  // Get data from the event
+  // The balances.transfer event has the following payload \[from, to, value\]
+  // logger.info(JSON.stringify(event));
+  const {
+    event: {
+      data: [address, token_id, token_amount, vtoken_amount, fee, remark],
+    },
+  } = event;
+
+  const blockNumber: number = event.block.block.header.number.toNumber();
+
+  const who = await checkAndGetMintAccount(address.toString(), blockNumber);
+
+  // Create the new transfer entity
+  const transfer = Minted.create({
+    id: `${event.block.block.header.number.toNumber()}-${event.idx}`,
+    blockNumber,
+    date: event.block.timestamp,
+    whoId: who.id,
+    token_id: token_id.toString(),
+    vtoken_amount: (vtoken_amount as Balance).toBigInt(),
+    token_amount: (token_amount as Balance).toBigInt(),
+  });
+
+  who.lastMintBlock = blockNumber;
+
+  await Promise.all([who.save(), transfer.save()]);
+}
+
+async function checkAndGetMintAccount(
+  id: string,
+  blockNumber: number,
+): Promise<MintAccount> {
+  let account = await MintAccount.get(id);
+  if (!account) {
+    // We couldn't find the account
+    account = MintAccount.create({
+      id: id,
+      publicKey: decodeAddress(id).toString(),
+      firstMintBlock: blockNumber,
     });
   }
   return account;

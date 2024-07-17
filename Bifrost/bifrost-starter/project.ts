@@ -80,6 +80,14 @@ const project: SubstrateProject = {
               method: "Redeemed",
             },
           },
+          {
+            kind: SubstrateHandlerKind.Event,
+            handler: "handleMintEvent",
+            filter: {
+              module: "vTokenMinting",
+              method: "Minted",
+            },
+          },
         ],
       },
     },
