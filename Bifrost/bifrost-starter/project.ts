@@ -27,7 +27,7 @@ const project: SubstrateProject = {
   network: {
     /* The genesis hash of the network (hash of block 0) */
     chainId:
-      "0x9f28c6a68e0fc9646eff64935684f6eeeece527e37bbe1f213d22caa1d9d6bed",
+      "0x355ba8c9335b0682d6a5b3a4335cc2453431d2fc2cf50bff32d6b993c2987cc8",
     /**
      * These endpoint(s) should be public non-pruned archive node
      * We recommend providing more than one endpoint for improved reliability, performance, and uptime
@@ -37,8 +37,7 @@ const project: SubstrateProject = {
      * These settings can be found in your docker-compose.yaml, they will slow indexing but prevent your project being rate limited
      */
     endpoint: [
-      "wss://bifrost-parachain.api.onfinality.io/public-ws",
-      "wss://bifrost-rpc.liebi.com/ws",
+      "wss://fraa-flashbox-4405-rpc.a.stagenet.tanssi.network",
     ],
     chaintypes: {
       file: "./dist/chaintypes.js",
@@ -47,7 +46,7 @@ const project: SubstrateProject = {
   dataSources: [
     {
       kind: SubstrateDatasourceKind.Runtime,
-      startBlock: 1,
+      startBlock: 395000,
       mapping: {
         file: "./dist/index.js",
         handlers: [
@@ -71,6 +70,14 @@ const project: SubstrateProject = {
             filter: {
               module: "balances",
               method: "Transfer",
+            },
+          },
+          {
+            kind: SubstrateHandlerKind.Event,
+            handler: "handleRedeemEvent",
+            filter: {
+              module: "vTokenMinting",
+              method: "Redeemed",
             },
           },
         ],

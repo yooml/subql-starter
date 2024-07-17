@@ -49,3 +49,41 @@ type Account @entity {
   sentTransfers: [Transfer] @derivedFrom(field: "from") # These are virtual properties to help us navigate to the correct foreign key of Transfer
   recievedTransfers: [Transfer] @derivedFrom(field: "to") # These are virtual properties to help us navigate to the correct foreign key of Transfer
 }
+
+type Redeemed @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The block height of the transfer
+  """
+  blockNumber: Int!
+  """
+  The date of the transfer
+  """
+  date: Date!
+  who: Account!
+  vtoken_amount: BigInt!
+  token_amount: BigInt!
+}
+
+type RedeemAccount @entity {
+  """
+  id field is always required and must look like this
+  """
+  id: ID!
+  """
+  The public key of this account (same across all Polkadot parachains)
+  """
+  publicKey: String!
+  """
+  The first block on which we see a transfer involving this account
+  """
+  firstRedeemBlock: Int
+  """
+  The most recent block on which we see a transfer involving this account
+  """
+  lastRedeemBlock: Int
+  Redeems: [Redeemed] @derivedFrom(field: "who") # These are virtual properties to help us navigate to the correct foreign key of Transfer
+}
